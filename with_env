@@ -1,0 +1,36 @@
+#!/bin/bash
+set +x
+environ=base
+commands=()
+
+while [[ $# > 0 ]]
+do
+    key="$1"
+    case $key in
+        -n|--name)
+            environ="$2"
+            shift 2
+            ;;
+        *)
+            commands+=("$1")
+            shift
+            ;;
+    esac
+done
+
+
+type conda &>/dev/null
+if [[ $? != 0 ]]; then
+    venv_root=${HOME}/.venvs
+    venv_path=${venv_root}/${environ}
+
+    [[ ! -d ${venv_root} ]] && mkdir -p ${venv_root}
+    [[ ! -d ${venv_path} ]] && python -m venv "${venv_path}"
+
+    source "${venv_path}/bin/activate"
+else
+    source activate ${environ}
+fi
+
+"${commands[@]}"
+exit $?
